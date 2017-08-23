@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 2.8)
 project(smack)
 
 if (NOT WIN32 OR MSYS OR CYGWIN)
-  find_program(LLVM_CONFIG_EXECUTABLE NAMES llvm-config-3.8 llvm-config PATHS ${LLVM_CONFIG} DOC "llvm-config")
+  find_program(LLVM_CONFIG_EXECUTABLE NAMES llvm-config-3.9 llvm-config PATHS ${LLVM_CONFIG} DOC "llvm-config")
 
   if (LLVM_CONFIG_EXECUTABLE STREQUAL "LLVM_CONFIG_EXECUTABLE-NOTFOUND")
     message(FATAL_ERROR "llvm-config could not be found!")
@@ -151,6 +151,7 @@ add_library(dsa STATIC
 )
 
 add_library(smackTranslator STATIC
+  include/smack/AddTiming.h
   include/smack/BoogieAst.h
   include/smack/BplFilePrinter.h
   include/smack/BplPrinter.h
@@ -164,11 +165,13 @@ add_library(smackTranslator STATIC
   include/smack/RemoveDeadDefs.h
   include/smack/RenameIntrinsics.h
   include/smack/ExtractContracts.h
+  include/smack/VerifierCodeMetadata.h
   include/smack/SimplifyLibCalls.h
   include/smack/SmackRep.h
   include/smack/MemorySafetyChecker.h
   include/smack/SignedIntegerOverflowChecker.h
-  include/smack/SplitStructLoadStore.h
+  include/smack/SplitAggregateLoadStore.h
+  lib/smack/AddTiming.cpp
   lib/smack/BoogieAst.cpp
   lib/smack/BplFilePrinter.cpp
   lib/smack/BplPrinter.cpp
@@ -182,11 +185,12 @@ add_library(smackTranslator STATIC
   lib/smack/RemoveDeadDefs.cpp
   lib/smack/RenameIntrinsics.cpp
   lib/smack/ExtractContracts.cpp
+  lib/smack/VerifierCodeMetadata.cpp
   lib/smack/SimplifyLibCalls.cpp
   lib/smack/SmackRep.cpp
   lib/smack/MemorySafetyChecker.cpp
   lib/smack/SignedIntegerOverflowChecker.cpp
-  lib/smack/SplitStructLoadStore.cpp
+  lib/smack/SplitAggregateLoadStore.cpp
 )
 
 add_executable(llvm2bpl

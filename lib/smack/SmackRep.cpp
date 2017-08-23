@@ -45,12 +45,6 @@ namespace smack {
 
 const unsigned MEMORY_INTRINSIC_THRESHOLD = 0;
 
-Regex PROC_MALLOC_FREE("^(malloc|free_)$");
-Regex PROC_IGNORE("^("
-  "llvm\\.memcpy\\..*|llvm\\.memset\\..*|llvm\\.dbg\\..*|"
-  "__SMACK_code|__SMACK_decl|__SMACK_top_decl"
-")$");
-
 const std::vector<unsigned> INTEGER_SIZES = {1, 8, 16, 24, 32, 40, 48, 56, 64, 88, 96, 128};
 const std::vector<unsigned> REF_CONSTANTS = {
   0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
@@ -604,19 +598,17 @@ const Expr* SmackRep::lit(const llvm::Value* v, bool isUnsigned) {
   } else if (const ConstantFP* CFP = dyn_cast<const ConstantFP>(v)) {
     if (SmackOptions::BitPrecise) {
       const APFloat APF = CFP->getValueAPF();
-      std::string str;
-      raw_string_ostream ss(str);
-      ss << *CFP;
-      std::istringstream iss(str);
-      std::string float_type;
-      iss >> float_type;
+      const Type* type = CFP->getType();
       unsigned expSize, sigSize;
-      if (float_type=="float") {
+      if (type->isFloatTy()) {
         expSize = 8;
         sigSize = 24;
-      } else if (float_type=="double") {
+      } else if (type->isDoubleTy()) {
         expSize = 11;
         sigSize = 53;
+      } else if (type->isX86_FP80Ty()) {
+        expSize = 15;
+        sigSize = 65;
       } else {
         llvm_unreachable("Unsupported floating-point type.");
       }
